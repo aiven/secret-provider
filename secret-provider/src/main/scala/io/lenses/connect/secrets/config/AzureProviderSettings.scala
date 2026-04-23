@@ -7,17 +7,21 @@
 package io.lenses.connect.secrets.config
 
 import com.typesafe.scalalogging.StrictLogging
+import io.lenses.connect.secrets.connect.AuthMode
 import io.lenses.connect.secrets.connect.AuthMode.AuthMode
-import io.lenses.connect.secrets.connect._
+import io.lenses.connect.secrets.connect.FILE_DIR
+import io.lenses.connect.secrets.connect.SECRET_DEFAULT_TTL
+import io.lenses.connect.secrets.connect.getAuthenticationMethod
 import org.apache.kafka.common.config.types.Password
 import org.apache.kafka.connect.errors.ConnectException
 
 case class AzureProviderSettings(
-  clientId: String,
-  tenantId: String,
-  secretId: Password,
-  authMode: AuthMode,
-  fileDir:  String,
+  clientId:   String,
+  tenantId:   String,
+  secretId:   Password,
+  authMode:   AuthMode,
+  fileDir:    String,
+  defaultTtl: Long,
 )
 
 import io.lenses.connect.secrets.config.AbstractConfigExtensions._
@@ -50,14 +54,16 @@ object AzureProviderSettings extends StrictLogging {
         )
     }
 
-    val fileDir = config.getString(FILE_DIR)
+    val fileDir    = config.getString(FILE_DIR)
+    val defaultTtl = config.getLong(SECRET_DEFAULT_TTL)
 
     AzureProviderSettings(
-      clientId = config.getString(AzureProviderConfig.AZURE_CLIENT_ID),
-      tenantId = config.getString(AzureProviderConfig.AZURE_TENANT_ID),
-      secretId = config.getPassword(AzureProviderConfig.AZURE_SECRET_ID),
-      authMode = authMode,
-      fileDir  = fileDir,
+      clientId   = config.getString(AzureProviderConfig.AZURE_CLIENT_ID),
+      tenantId   = config.getString(AzureProviderConfig.AZURE_TENANT_ID),
+      secretId   = config.getPassword(AzureProviderConfig.AZURE_SECRET_ID),
+      authMode   = authMode,
+      fileDir    = fileDir,
+      defaultTtl = defaultTtl,
     )
   }
 }
