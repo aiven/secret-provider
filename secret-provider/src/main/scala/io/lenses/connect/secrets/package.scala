@@ -39,7 +39,7 @@ package object connect extends StrictLogging {
       |""".stripMargin
 
   val SECRET_DEFAULT_TTL         = "secret.default.ttl"
-  val SECRET_DEFAULT_TTL_DEFAULT = 0L
+  val SECRET_DEFAULT_TTL_DEFAULT = 86400000L // 24 hours in milliseconds
 
   object AuthMode extends Enumeration {
     type AuthMode = Value

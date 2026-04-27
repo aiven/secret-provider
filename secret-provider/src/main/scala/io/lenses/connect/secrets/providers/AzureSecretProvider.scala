@@ -26,6 +26,7 @@ class AzureSecretProvider() extends ConfigProvider with AzureHelper {
 
   private var rootDir:     String                            = _
   private var credentials: Option[TokenCredential]           = None
+  private var defaultTtl:  Long                              = _
   val clientMap:           mutable.Map[String, SecretClient] = mutable.Map.empty
   val cache = mutable.Map.empty[String, (Option[OffsetDateTime], Map[String, String])]
 
@@ -34,6 +35,7 @@ class AzureSecretProvider() extends ConfigProvider with AzureHelper {
     val settings = AzureProviderSettings(AzureProviderConfig(configs))
     rootDir     = settings.fileDir
     credentials = Some(createCredentials(settings))
+    defaultTtl  = settings.defaultTtl
   }
 
   // lookup secrets at a path
@@ -86,10 +88,14 @@ class AzureSecretProvider() extends ConfigProvider with AzureHelper {
         getSecretsAndExpiry(getSecrets(client, keys.asScala.toSet))
     }
 
-    var ttl = 0L
-    expiry.foreach { exp =>
-      ttl = Duration.between(now, exp).toMillis
-      logger.info(s"Min expiry for TTL set to [${exp.toString}]")
+    val ttl = expiry match {
+      case Some(exp) =>
+        val t = Duration.between(now, exp).toMillis
+        logger.info(s"Min expiry for TTL set to [${exp.toString}]")
+        t
+      case None =>
+        logger.info(s"No expiry set, using default TTL of [$defaultTtl] ms")
+        defaultTtl
     }
     cache.put(keyVaultUrl, (expiry, data))
     new ConfigData(data.asJava, ttl)

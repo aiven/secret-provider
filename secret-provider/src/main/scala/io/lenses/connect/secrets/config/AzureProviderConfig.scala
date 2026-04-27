@@ -61,6 +61,13 @@ object AzureProviderConfig {
       Importance.MEDIUM,
       FILE_DIR_DESC,
     )
+    .define(
+      SECRET_DEFAULT_TTL,
+      Type.LONG,
+      SECRET_DEFAULT_TTL_DEFAULT,
+      Importance.MEDIUM,
+      "Default TTL to apply in case a secret has no TTL",
+    )
 }
 
 case class AzureProviderConfig(props: util.Map[String, _]) extends AbstractConfig(AzureProviderConfig.config, props)
